@@ -3,35 +3,31 @@ package writer
 import (
 	"cbs/cbs_proto"
 
-	"bytes"
-	"encoding/binary"
-
 	"code.google.com/p/goprotobuf/proto"
-    "code.google.com/p/lzma"
 )
 
 type Uint32Writer struct {
 	data []uint32
 }
 
-func (u *Uint32Writer) Flush() (header *cbs_proto.Header, result []byte, err error) {
-	var buf bytes.Buffer
+func (u *Uint32Writer) Clear() {
+	u.data = u.data[0:0]
+}
 
-	w := lzma.NewWriterSizeLevel(&buf, int64(len(u.data)) * 4, 9)
-	if err = binary.Write(w, binary.BigEndian, u.data); err != nil {
-		w.Close()
+func (u *Uint32Writer) IsFull() bool {
+	return len(u.data) == cap(u.data)
+}
+
+func (u *Uint32Writer) Flush() (header *cbs_proto.Header, result []byte, err error) {
+	if result, err = LzmaCompress(int64(len(u.data)) * 4, u.data); err != nil {
 		return
 	}
-	w.Close()
-
 
 	header = &cbs_proto.Header{
-		NumRows: proto.Uint64(uint64(len(u.data))),
+		NumRows: proto.Uint64(uint64(u.Len())),
 		BlockSize: proto.Uint64(uint64(len(u.data) * 4)),
-		CompressedBlockSize: proto.Uint64(uint64(buf.Len())),
+		CompressedBlockSize: proto.Uint64(uint64(len(result))),
 	}
-
-	result = buf.Bytes()
 
 	u.data = u.data[0:0]
 	return
