@@ -11,6 +11,13 @@ import (
 )
 
 const BS = 256 * 1024
+const LOCALPREFIX = 3569426432
+const LOCALMASK = 4294959104
+
+
+func localIp(x uint32) bool {
+  	return (x & LOCALMASK) == LOCALPREFIX
+}
 
 func main() {
 	ifile, err := os.Open(os.Args[1])
@@ -26,6 +33,7 @@ func main() {
 	icsv := csv.NewReader(igz)
 
 	ww := writer.NewUint32Writer(BS)
+	wd := writer.NewUint16Writer(BS)
 
 	for {
 		rec, err := icsv.Read()
@@ -38,9 +46,14 @@ func main() {
 			break
 		}
 
-		ww.Append(rv5.DstAddr)
+		if !localIp(rv5.DstAddr) {
+			ww.Append(rv5.DstAddr)
+		}
+		wd.Append(rv5.DstPort)
 		if ww.Len() >= BS {
 			h, v, err := ww.Flush()
+			fmt.Println(h, len(v), err)
+			h, v, err = wd.Flush()
 			fmt.Println(h, len(v), err)
 		}
 
