@@ -8,9 +8,10 @@ import (
 func LzmaCompress(size int64, data []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	wr := lzma.NewWriterSizeLevel(&buf, size, 9)
-	_, err := wr.Write(data)
-	wr.Close()
-	if err != nil {
+	if _, err := wr.Write(data); err != nil {
+		return nil, err
+	}
+	if err := wr.Close(); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
