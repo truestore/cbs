@@ -1,21 +1,20 @@
 package writer
 
 import (
-	"bytes"
-	"code.google.com/p/lzma"
-	"encoding/binary"
+	"errors"
+
+	"github.com/truestore/cbs/cbs_proto"
 )
 
-type WriterType interface {
+type Writer interface {
+	Append(data interface{})
+	Flush() (header *cbs_proto.Header, result []byte, err error)
+	IsFull() bool
+	Len() int
+	Clear()
 }
 
-func LzmaCompress(size int64, data interface{}) ([]byte, error) {
-	var buf bytes.Buffer
-	wr := lzma.NewWriterSizeLevel(&buf, size, 9)
-	err := binary.Write(wr, binary.BigEndian, data)
-	wr.Close()
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
+var (
+	TypeMismatch = errors.New("Type mismatch")
+	TypeUnknown  = errors.New("Type unknown")
+)
