@@ -1,22 +1,21 @@
 package main
 
 import (
-	"cbs/netflow"
-	"cbs/writer"
+	"github.com/truestore/cbs/netflow"
+	"github.com/truestore/cbs/writer"
 
 	"compress/gzip"
 	"encoding/csv"
-	"os"
 	"fmt"
+	"os"
 )
 
 const BS = 256 * 1024
 const LOCALPREFIX = 3569426432
 const LOCALMASK = 4294959104
 
-
 func localIp(x uint32) bool {
-  	return (x & LOCALMASK) == LOCALPREFIX
+	return (x & LOCALMASK) == LOCALPREFIX
 }
 
 func main() {
@@ -59,4 +58,3 @@ func main() {
 
 	}
 }
-

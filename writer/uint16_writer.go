@@ -1,11 +1,10 @@
 package writer
 
 import (
-	"cbs/cbs_proto"
+	"github.com/truestore/cbs/cbs_proto"
 
 	"code.google.com/p/goprotobuf/proto"
 )
-
 
 type Uint16Writer struct {
 	data []uint16
@@ -20,18 +19,18 @@ func (u *Uint16Writer) IsFull() bool {
 }
 
 func (u *Uint16Writer) Flush() (header *cbs_proto.Header, result []byte, err error) {
-	if result, err = LzmaCompress(int64(len(u.data)) * 2, u.data); err != nil {
+	if result, err = LzmaCompress(int64(len(u.data))*2, u.data); err != nil {
 		return
 	}
 
 	header = &cbs_proto.Header{
-NumRows: proto.Uint64(uint64(u.Len())),
-BlockSize: proto.Uint64(uint64(len(u.data) * 2)),
-	CompressedBlockSize: proto.Uint64(uint64(len(result))),
-}
+		NumRows:             proto.Uint64(uint64(u.Len())),
+		BlockSize:           proto.Uint64(uint64(len(u.data) * 2)),
+		CompressedBlockSize: proto.Uint64(uint64(len(result))),
+	}
 
-u.data = u.data[0:0]
-return
+	u.data = u.data[0:0]
+	return
 }
 
 func NewUint16Writer(size int) *Uint16Writer {
@@ -44,7 +43,7 @@ func (u *Uint16Writer) Len() int {
 	return len(u.data)
 }
 
-func (u *Uint16Writer) Append(data interface {}) {
+func (u *Uint16Writer) Append(data interface{}) {
 	if x, ok := data.(uint16); ok {
 		u.data = append(u.data, x)
 	}
