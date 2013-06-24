@@ -7,6 +7,7 @@ import (
 	"compress/gzip"
 	"encoding/csv"
 	"fmt"
+	"log"
 	"os"
 )
 
@@ -21,12 +22,12 @@ func localIp(x uint32) bool {
 func main() {
 	ifile, err := os.Open(os.Args[1])
 	if err != nil {
-		return
+		log.Fatal(err)
 	}
 
 	igz, err := gzip.NewReader(ifile)
 	if err != nil {
-		return
+		log.Fatal(err)
 	}
 
 	icsv := csv.NewReader(igz)
