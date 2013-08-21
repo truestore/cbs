@@ -1,11 +1,11 @@
-package writer
+package cbs
 
 import (
 	"bytes"
 	"code.google.com/p/lzma"
 )
 
-func LzmaCompress(size int64, data []byte) ([]byte, error) {
+func lzmaCompress(size int64, data []byte) ([]byte, error) {
 	var buf bytes.Buffer
 	wr := lzma.NewWriterSizeLevel(&buf, size, 9)
 	if _, err := wr.Write(data); err != nil {
