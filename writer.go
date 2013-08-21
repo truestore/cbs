@@ -4,7 +4,6 @@ import (
 	"io"
 
 	"code.google.com/p/goprotobuf/proto"
-	"github.com/truestore/cbs/cbs_proto"
 )
 
 type Writer interface {

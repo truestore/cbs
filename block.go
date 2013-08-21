@@ -1,5 +1,10 @@
 package cbs
 
+import (
+	"code.google.com/p/goprotobuf/proto"
+	"github.com/truestore/cbs/cbs_proto"
+)
+
 type block struct {
 	Header *cbs_proto.Header
 	Data   []byte
