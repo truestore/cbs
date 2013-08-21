@@ -9,14 +9,7 @@ import (
 
 type Writer interface {
 	Append(value interface{}) error
-}
-
-func NewUint16Writer(w io.Writer) Writer {
-	return newWriter(w, uint16ToBytes)
-}
-
-func NewUint32Writer(w io.Writer) Writer {
-	return newWriter(w, uint32ToBytes)
+	Flush() error
 }
 
 type writer struct {
@@ -25,6 +18,11 @@ type writer struct {
 	data  []byte
 	nrows uint64
 }
+
+// check that writer implements Writer interface
+var _ Writer = &writer{}
+
+type byteConverter func(v interface{}) []byte
 
 func newWriter(w io.Writer, conv byteConverter) *writer {
 	return &writer{w: w, conv: conv}
@@ -42,13 +40,13 @@ func (w *writer) Append(v interface{}) error {
 	}
 
 	if w.nrows >= blockSize {
-		w.flush()
+		w.Flush()
 	}
 
 	return nil
 }
 
-func (w *writer) flush() error {
+func (w *writer) Flush() error {
 	block, err := packBlock(w.nrows, w.data)
 	if err != nil {
 		return err
@@ -73,24 +71,10 @@ func (w *writer) flush() error {
 	return nil
 }
 
-type block struct {
-	Header *cbs_proto.Header
-	Data   []byte
+func NewUint16Writer(w io.Writer) Writer {
+	return newWriter(w, uint16ToBytes)
 }
 
-type byteConverter func(v interface{}) []byte
-
-func packBlock(nrows uint64, data []byte) (*block, error) {
-	compressed, err := lzmaCompress(int64(len(data)), data)
-	if err != nil {
-		return nil, err
-	}
-
-	header := cbs_proto.Header{
-		NumRows:             proto.Uint64(nrows),
-		BlockSize:           proto.Uint64(uint64(len(data))),
-		CompressedBlockSize: proto.Uint64(uint64(len(compressed))),
-	}
-
-	return &block{&header, compressed}, nil
+func NewUint32Writer(w io.Writer) Writer {
+	return newWriter(w, uint32ToBytes)
 }
